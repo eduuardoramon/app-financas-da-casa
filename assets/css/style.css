@@ -451,7 +451,7 @@ body::before {
   inset: 0;
   z-index: 20;
   display: grid;
-  place-items: end center;
+  place-items: center;
   background: rgba(15, 23, 42, 0.48);
   padding: 18px;
 }

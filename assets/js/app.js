@@ -134,7 +134,6 @@ const setSaveState = (isSaving) => {
 const openExpenseModal = () => {
   expenseDate.value = getTodayInputValue();
   expenseModal.classList.remove("is-hidden");
-  expenseDescription.focus();
 };
 
 const closeExpenseModal = () => {
