@@ -16,12 +16,16 @@
   font-family: Inter, Arial, sans-serif;
 }
 
+html {
+  background: #0f172a;
+}
+
 body {
   position: relative;
   min-height: 100vh;
   background: #f8fafc;
   color: var(--text);
-  padding: 18px;
+  padding: calc(18px + env(safe-area-inset-top)) 18px 18px;
 }
 
 body.modal-open {
@@ -36,7 +40,7 @@ body::before {
   position: fixed;
   inset: 0 0 auto;
   z-index: -1;
-  height: 340px;
+  height: calc(340px + env(safe-area-inset-top));
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%),
     linear-gradient(180deg, #0f172a 0%, #111827 100%);

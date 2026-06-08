@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Finanças da Casa</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -11,7 +13,7 @@
   <main class="app">
     <header class="topbar">
       <div class="eyebrow">Finanças da Casa</div>
-      <h1>Controle financeiro</h1>
+      <h1>Despesas Fixas</h1>
       <p>Visão mensal base para acompanhar os compromissos principais da casa.</p>
     </header>
 
@@ -32,11 +34,11 @@
         </div>
 
         <div class="section-actions">
-          <button id="toggleExpenses" class="toggle-btn">Expandir</button>
+          <button id="toggleExpenses" class="toggle-btn">Ocultar</button>
         </div>
       </div>
 
-      <div class="expense-grid is-hidden" id="expenseGrid">
+      <div class="expense-grid" id="expenseGrid">
         <article class="expense-item">
           <div class="icon">🏠</div>
           <div class="expense-info">
@@ -187,21 +189,14 @@
             <span>$800.00</span>
           </div>
 
-          <div class="progress-block">
-            <div class="progress-percent" id="marketPercent">0%</div>
-            <div class="progress-track">
-              <div class="progress-fill" id="marketProgress" style="width: 0%;"></div>
-            </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 0%;"></div>
           </div>
 
           <div class="variable-usage">
             <span>Utilizado até o momento</span>
-            <strong id="marketUsed">$0.00</strong>
+            <strong>$0.00</strong>
           </div>
-
-          <div class="variable-details is-hidden" id="marketDetails"></div>
-
-          <button class="detail-toggle-btn" data-target="marketDetails" aria-label="Expandir Mercado">⌄</button>
         </article>
 
         <article class="variable-item">
@@ -213,108 +208,18 @@
             <span>$400.00</span>
           </div>
 
-          <div class="progress-block">
-            <div class="progress-percent" id="extrasPercent">0%</div>
-            <div class="progress-track">
-              <div class="progress-fill" id="extrasProgress" style="width: 0%;"></div>
-            </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 0%;"></div>
           </div>
 
           <div class="variable-usage">
             <span>Utilizado até o momento</span>
-            <strong id="extrasUsed">$0.00</strong>
+            <strong>$0.00</strong>
           </div>
-
-          <div class="variable-details is-hidden" id="extrasDetails"></div>
-
-          <button class="detail-toggle-btn" data-target="extrasDetails" aria-label="Expandir Extras">⌄</button>
-        </article>
-
-        <article class="variable-item">
-          <div class="variable-topline">
-            <div>
-              <h3>Gasolina</h3>
-              <p>Total disponível: $450.00</p>
-            </div>
-            <span>$450.00</span>
-          </div>
-
-          <div class="progress-block">
-            <div class="progress-percent" id="gasPercent">0%</div>
-            <div class="progress-track">
-              <div class="progress-fill" id="gasProgress" style="width: 0%;"></div>
-            </div>
-          </div>
-
-          <div class="variable-usage">
-            <span>Utilizado até o momento</span>
-            <strong id="gasUsed">$0.00</strong>
-          </div>
-
-          <div class="variable-details is-hidden" id="gasDetails"></div>
-
-          <button class="detail-toggle-btn" data-target="gasDetails" aria-label="Expandir Gasolina">⌄</button>
         </article>
       </div>
     </section>
   </main>
-
-  <button class="floating-add-btn" aria-label="Adicionar despesa">+</button>
-
-  <div class="success-feedback is-hidden" id="successFeedback" aria-live="polite">
-    <div class="success-check">✓</div>
-    <span>Despesa adicionada</span>
-  </div>
-
-  <div class="modal-overlay is-hidden" id="expenseModal">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
-      <div class="modal-header">
-        <div>
-          <h2 id="expenseModalTitle">Novo gasto variável</h2>
-          <span>Adicione uma despesa do mês corrente</span>
-        </div>
-      </div>
-
-      <form id="expenseForm">
-        <label class="form-field" for="expenseCategory">
-          <span>Categoria</span>
-          <select id="expenseCategory" name="category">
-            <option value="Mercado">Mercado</option>
-            <option value="Extras">Extras</option>
-            <option value="Gasolina">Gasolina</option>
-          </select>
-        </label>
-
-        <label class="form-field" for="expenseDescription">
-          <span>Descrição</span>
-          <input id="expenseDescription" name="description" type="text" placeholder="Ex: Walmart, farmácia, posto" required />
-        </label>
-
-        <label class="form-field" for="expenseDate">
-          <span>Data</span>
-          <input id="expenseDate" name="date" type="date" required />
-        </label>
-
-        <label class="form-field" for="expenseOwner">
-          <span>Quem está inserindo</span>
-          <select id="expenseOwner" name="owner">
-            <option value="Eduardo">Eduardo</option>
-            <option value="Camila">Camila</option>
-          </select>
-        </label>
-
-        <label class="form-field" for="expenseAmount">
-          <span>Valor</span>
-          <input id="expenseAmount" name="amount" type="number" min="0" step="0.01" placeholder="0.00" required />
-        </label>
-
-        <div class="modal-actions">
-          <button type="button" class="modal-btn secondary" id="cancelExpense">Cancelar</button>
-          <button type="submit" class="modal-btn primary">Salvar</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <script src="assets/js/app.js"></script>
 </body>
