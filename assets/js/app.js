@@ -75,6 +75,9 @@ const expenseDescription = document.getElementById("expenseDescription");
 const expenseAmount = document.getElementById("expenseAmount");
 const cancelExpenseButton = document.getElementById("cancelExpense");
 const saveExpenseButton = expenseForm.querySelector(".modal-btn.primary");
+const successFeedback = document.getElementById("successFeedback");
+let pageScrollY = 0;
+let successTimer;
 
 const supabaseHeaders = {
   apikey: SUPABASE_ANON_KEY,
@@ -132,6 +135,9 @@ const setSaveState = (isSaving) => {
 };
 
 const openExpenseModal = () => {
+  pageScrollY = window.scrollY;
+  document.body.style.top = `-${pageScrollY}px`;
+  document.body.classList.add("modal-open");
   expenseDate.value = getTodayInputValue();
   expenseModal.classList.remove("is-hidden");
 };
@@ -140,6 +146,24 @@ const closeExpenseModal = () => {
   expenseModal.classList.add("is-hidden");
   expenseForm.reset();
   setSaveState(false);
+  document.body.classList.remove("modal-open");
+  document.body.style.top = "";
+  window.scrollTo(0, pageScrollY);
+};
+
+const showSuccessFeedback = () => {
+  clearTimeout(successTimer);
+  successFeedback.classList.remove("is-hidden");
+  successFeedback.classList.remove("is-leaving");
+
+  successTimer = setTimeout(() => {
+    successFeedback.classList.add("is-leaving");
+
+    setTimeout(() => {
+      successFeedback.classList.add("is-hidden");
+      successFeedback.classList.remove("is-leaving");
+    }, 220);
+  }, 1300);
 };
 
 floatingAddButton.addEventListener("click", openExpenseModal);
@@ -319,6 +343,7 @@ expenseForm.addEventListener("submit", async (event) => {
 
     closeExpenseModal();
     await loadVariableExpenses();
+    showSuccessFeedback();
   } catch (error) {
     alert(error.message);
     setSaveState(false);
