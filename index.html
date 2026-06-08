@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finanças da Casa</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="eyebrow">Finanças da Casa</div>
+      <h1>Despesas Fixas</h1>
+      <p>Visão mensal base para acompanhar os compromissos principais da casa.</p>
+    </header>
+
+    <section class="summary-card">
+      <div class="summary-label">Total mensal previsto</div>
+      <div class="summary-total">$5,369.00</div>
+
+      <div class="summary-meta">
+        <div class="pill">14 itens</div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <div class="section-header">
+        <div>
+          <h2>Lista de despesas</h2>
+          <span>Valores fixos e estimativas mensais</span>
+        </div>
+
+        <div class="section-actions">
+          <button id="toggleExpenses" class="toggle-btn">Expandir</button>
+        </div>
+      </div>
+
+      <div class="expense-grid is-hidden" id="expenseGrid">
+        <article class="expense-item">
+          <div class="icon">🏠</div>
+          <div class="expense-info">
+            <h3>Aluguel</h3>
+            <p>Dia 1 a 3 de cada mês</p>
+          </div>
+          <div class="expense-value">$1,797.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">🎓</div>
+          <div class="expense-info">
+            <h3>Escola</h3>
+            <p>Até dia 3</p>
+          </div>
+          <div class="expense-value">$525.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">💡</div>
+          <div class="expense-info">
+            <h3>Utilities</h3>
+            <p>Água, luz e trash</p>
+          </div>
+          <div class="expense-value">$190.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">📱</div>
+          <div class="expense-info">
+            <h3>Telefone</h3>
+            <p>Mensal</p>
+          </div>
+          <div class="expense-value">$50.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">👤</div>
+          <div class="expense-info">
+            <h3>Camila</h3>
+            <p>Gastos pessoais</p>
+          </div>
+          <div class="expense-value">$170.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">🥋</div>
+          <div class="expense-info">
+            <h3>Jiujitsu</h3>
+            <p>Mensal</p>
+          </div>
+          <div class="expense-value">$155.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">🚗</div>
+          <div class="expense-info">
+            <h3>Seguro dos Carros</h3>
+            <p>Mensal</p>
+          </div>
+          <div class="expense-value">$245.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">🏢</div>
+          <div class="expense-info">
+            <h3>Seguro da Empresa</h3>
+            <p>Mensal</p>
+          </div>
+          <div class="expense-value">$50.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">🏋️</div>
+          <div class="expense-info">
+            <h3>LA Fitness</h3>
+            <p>Camila e Eduardo</p>
+          </div>
+          <div class="expense-value">$67.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">🛒</div>
+          <div class="expense-info">
+            <h3>Mercado</h3>
+            <p>Estimativa mensal</p>
+          </div>
+          <div class="expense-value">$800.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">💳</div>
+          <div class="expense-info">
+            <h3>Oportun</h3>
+            <p>Mensal</p>
+          </div>
+          <div class="expense-value">$70.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">⛽</div>
+          <div class="expense-info">
+            <h3>Gasolina</h3>
+            <p>Estimativa mensal</p>
+          </div>
+          <div class="expense-value">$450.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">➕</div>
+          <div class="expense-info">
+            <h3>Extras</h3>
+            <p>Margem mensal</p>
+          </div>
+          <div class="expense-value">$400.00</div>
+        </article>
+
+        <article class="expense-item">
+          <div class="icon">💰</div>
+          <div class="expense-info">
+            <h3>Savings</h3>
+            <p>Valor mensal</p>
+          </div>
+          <div class="expense-value">$400.00</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-card variable-card">
+      <div class="section-header">
+        <div>
+          <h2>Despesas variáveis</h2>
+          <span>Acompanhamento do mês corrente</span>
+        </div>
+
+        <div class="section-actions">
+          <div class="month-badge" id="currentMonth"></div>
+        </div>
+      </div>
+
+      <div class="variable-grid">
+        <article class="variable-item">
+          <div class="variable-topline">
+            <div>
+              <h3>Mercado</h3>
+              <p>Total disponível: $800.00</p>
+            </div>
+            <span>$800.00</span>
+          </div>
+
+          <div class="progress-block">
+            <div class="progress-percent" id="marketPercent">0%</div>
+            <div class="progress-track">
+              <div class="progress-fill" id="marketProgress" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="variable-usage">
+            <span>Utilizado até o momento</span>
+            <strong id="marketUsed">$0.00</strong>
+          </div>
+
+          <div class="variable-details is-hidden" id="marketDetails"></div>
+
+          <button class="detail-toggle-btn" data-target="marketDetails" aria-label="Expandir Mercado">⌄</button>
+        </article>
+
+        <article class="variable-item">
+          <div class="variable-topline">
+            <div>
+              <h3>Extras</h3>
+              <p>Total disponível: $400.00</p>
+            </div>
+            <span>$400.00</span>
+          </div>
+
+          <div class="progress-block">
+            <div class="progress-percent" id="extrasPercent">0%</div>
+            <div class="progress-track">
+              <div class="progress-fill" id="extrasProgress" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="variable-usage">
+            <span>Utilizado até o momento</span>
+            <strong id="extrasUsed">$0.00</strong>
+          </div>
+
+          <div class="variable-details is-hidden" id="extrasDetails"></div>
+
+          <button class="detail-toggle-btn" data-target="extrasDetails" aria-label="Expandir Extras">⌄</button>
+        </article>
+
+        <article class="variable-item">
+          <div class="variable-topline">
+            <div>
+              <h3>Gasolina</h3>
+              <p>Total disponível: $450.00</p>
+            </div>
+            <span>$450.00</span>
+          </div>
+
+          <div class="progress-block">
+            <div class="progress-percent" id="gasPercent">0%</div>
+            <div class="progress-track">
+              <div class="progress-fill" id="gasProgress" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="variable-usage">
+            <span>Utilizado até o momento</span>
+            <strong id="gasUsed">$0.00</strong>
+          </div>
+
+          <div class="variable-details is-hidden" id="gasDetails"></div>
+
+          <button class="detail-toggle-btn" data-target="gasDetails" aria-label="Expandir Gasolina">⌄</button>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <button class="floating-add-btn" aria-label="Adicionar despesa">+</button>
+
+  <div class="modal-overlay is-hidden" id="expenseModal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
+      <div class="modal-header">
+        <div>
+          <h2 id="expenseModalTitle">Novo gasto variável</h2>
+          <span>Adicione uma despesa do mês corrente</span>
+        </div>
+      </div>
+
+      <form id="expenseForm">
+        <label class="form-field" for="expenseCategory">
+          <span>Categoria</span>
+          <select id="expenseCategory" name="category">
+            <option value="Mercado">Mercado</option>
+            <option value="Extras">Extras</option>
+            <option value="Gasolina">Gasolina</option>
+          </select>
+        </label>
+
+        <label class="form-field" for="expenseDescription">
+          <span>Descrição</span>
+          <input id="expenseDescription" name="description" type="text" placeholder="Ex: Walmart, farmácia, posto" required />
+        </label>
+
+        <label class="form-field" for="expenseDate">
+          <span>Data</span>
+          <input id="expenseDate" name="date" type="date" required />
+        </label>
+
+        <label class="form-field" for="expenseOwner">
+          <span>Quem está inserindo</span>
+          <select id="expenseOwner" name="owner">
+            <option value="Eduardo">Eduardo</option>
+            <option value="Camila">Camila</option>
+          </select>
+        </label>
+
+        <label class="form-field" for="expenseAmount">
+          <span>Valor</span>
+          <input id="expenseAmount" name="amount" type="number" min="0" step="0.01" placeholder="0.00" required />
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="modal-btn secondary" id="cancelExpense">Cancelar</button>
+          <button type="submit" class="modal-btn primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
