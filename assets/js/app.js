@@ -28,6 +28,13 @@ const variableCategories = {
     percentId: "gasPercent",
     progressId: "gasProgress",
     usedId: "gasUsed"
+  },
+  Trabalho: {
+    budget: 1100,
+    detailsId: "workDetails",
+    percentId: "workPercent",
+    progressId: "workProgress",
+    usedId: "workUsed"
   }
 };
 

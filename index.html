@@ -261,6 +261,32 @@
 
           <button class="detail-toggle-btn" data-target="gasDetails" aria-label="Expandir Gasolina">⌄</button>
         </article>
+
+        <article class="variable-item">
+          <div class="variable-topline">
+            <div>
+              <h3>Trabalho</h3>
+              <p>Total disponível: $1,100.00</p>
+            </div>
+            <span>$1,100.00</span>
+          </div>
+
+          <div class="progress-block">
+            <div class="progress-percent" id="workPercent">0%</div>
+            <div class="progress-track">
+              <div class="progress-fill" id="workProgress" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="variable-usage">
+            <span>Utilizado até o momento</span>
+            <strong id="workUsed">$0.00</strong>
+          </div>
+
+          <div class="variable-details is-hidden" id="workDetails"></div>
+
+          <button class="detail-toggle-btn" data-target="workDetails" aria-label="Expandir Trabalho">⌄</button>
+        </article>
       </div>
     </section>
   </main>
@@ -288,6 +314,7 @@
             <option value="Mercado">Mercado</option>
             <option value="Extras">Extras</option>
             <option value="Gasolina">Gasolina</option>
+            <option value="Trabalho">Trabalho</option>
           </select>
         </label>
 
