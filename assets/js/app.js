@@ -23,14 +23,14 @@ const variableCategories = {
     usedId: "extrasUsed"
   },
   Gasolina: {
-    budget: 450,
+    budget: 220,
     detailsId: "gasDetails",
     percentId: "gasPercent",
     progressId: "gasProgress",
     usedId: "gasUsed"
   },
   Trabalho: {
-    budget: 1100,
+    budget: 1200,
     detailsId: "workDetails",
     percentId: "workPercent",
     progressId: "workProgress",
@@ -226,9 +226,13 @@ const renderCategoryExpenses = (category, expenses) => {
   const used = document.getElementById(config.usedId);
   const progress = document.getElementById(config.progressId);
   const total = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
+  const available = config.budget - total;
   const percentage = Math.round((total / config.budget) * 100);
   const progressWidth = Math.min(percentage, 100);
   const status = getProgressStatus(percentage);
+  const availableLabel = used
+    .closest(".variable-item")
+    .querySelector(".variable-topline p");
 
   details.innerHTML = "";
 
@@ -244,6 +248,7 @@ const renderCategoryExpenses = (category, expenses) => {
   }
 
   used.textContent = currencyFormatter.format(total);
+  availableLabel.textContent = `Total disponível: ${currencyFormatter.format(available)}`;
   percent.textContent = `${percentage}%`;
   percent.className = `progress-percent is-${status}`;
   progress.style.width = `${progressWidth}%`;

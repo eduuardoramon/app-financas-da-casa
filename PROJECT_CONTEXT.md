@@ -15,7 +15,7 @@ Criar um dashboard doméstico simples, bonito e responsivo.
 ## Estado atual
 Existe um `index.html` com:
 - Card de despesas fixas
-- Total mensal previsto: $5,369.00
+- Total mensal previsto: $5,139.00
 - Lista de despesas fixa
 - Mês dinâmico no canto superior direito
 - Botão para ocultar/expandir a lista
