@@ -23,10 +23,10 @@
 
     <section class="summary-card">
       <div class="summary-label">Total mensal previsto</div>
-      <div class="summary-total">$5,139.00</div>
+      <div class="summary-total" id="fixedExpensesTotal">$5,139.00</div>
 
       <div class="summary-meta">
-        <div class="pill">14 itens</div>
+        <div class="pill" id="fixedExpensesCount">14 itens</div>
       </div>
     </section>
 
@@ -42,133 +42,7 @@
         </div>
       </div>
 
-      <div class="expense-grid is-hidden" id="expenseGrid">
-        <article class="expense-item">
-          <div class="icon">🏠</div>
-          <div class="expense-info">
-            <h3>Aluguel</h3>
-            <p>Dia 1 a 3 de cada mês</p>
-          </div>
-          <div class="expense-value">$1,797.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">🎓</div>
-          <div class="expense-info">
-            <h3>Escola</h3>
-            <p>Até dia 3</p>
-          </div>
-          <div class="expense-value">$525.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">💡</div>
-          <div class="expense-info">
-            <h3>Utilities</h3>
-            <p>Água, luz e trash</p>
-          </div>
-          <div class="expense-value">$190.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">📱</div>
-          <div class="expense-info">
-            <h3>Telefone</h3>
-            <p>Mensal</p>
-          </div>
-          <div class="expense-value">$50.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">👤</div>
-          <div class="expense-info">
-            <h3>Camila</h3>
-            <p>Gastos pessoais</p>
-          </div>
-          <div class="expense-value">$170.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">🥋</div>
-          <div class="expense-info">
-            <h3>Jiujitsu</h3>
-            <p>Mensal</p>
-          </div>
-          <div class="expense-value">$155.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">🚗</div>
-          <div class="expense-info">
-            <h3>Seguro dos Carros</h3>
-            <p>Mensal</p>
-          </div>
-          <div class="expense-value">$245.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">🏢</div>
-          <div class="expense-info">
-            <h3>Seguro da Empresa</h3>
-            <p>Mensal</p>
-          </div>
-          <div class="expense-value">$50.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">🏋️</div>
-          <div class="expense-info">
-            <h3>LA Fitness</h3>
-            <p>Camila e Eduardo</p>
-          </div>
-          <div class="expense-value">$67.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">🛒</div>
-          <div class="expense-info">
-            <h3>Mercado</h3>
-            <p>Estimativa mensal</p>
-          </div>
-          <div class="expense-value">$800.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">💳</div>
-          <div class="expense-info">
-            <h3>Oportun</h3>
-            <p>Mensal</p>
-          </div>
-          <div class="expense-value">$70.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">⛽</div>
-          <div class="expense-info">
-            <h3>Gasolina</h3>
-            <p>Estimativa mensal</p>
-          </div>
-          <div class="expense-value">$220.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">➕</div>
-          <div class="expense-info">
-            <h3>Extras</h3>
-            <p>Margem mensal</p>
-          </div>
-          <div class="expense-value">$400.00</div>
-        </article>
-
-        <article class="expense-item">
-          <div class="icon">💰</div>
-          <div class="expense-info">
-            <h3>Savings</h3>
-            <p>Valor mensal</p>
-          </div>
-          <div class="expense-value">$400.00</div>
-        </article>
-      </div>
+      <div class="expense-grid is-hidden" id="expenseGrid"></div>
     </section>
 
     <section class="section-card variable-card">

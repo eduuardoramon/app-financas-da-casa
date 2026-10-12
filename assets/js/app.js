@@ -6,6 +6,24 @@ const months = [
 const SUPABASE_URL = "https://ippfvdzmnsxyxawijjjs.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_d1IH3PrVEkz3MoHDWfPIew_V5LFQcSh";
 const VARIABLE_EXPENSES_TABLE = "variable_expenses";
+const FIXED_EXPENSES_STORAGE_KEY = "home-finance-fixed-expenses";
+
+const defaultFixedExpenses = [
+  { id: "rent", icon: "🏠", name: "Aluguel", description: "Dia 1 a 3 de cada mês", amount: 1797 },
+  { id: "school", icon: "🎓", name: "Escola", description: "Até dia 3", amount: 525 },
+  { id: "utilities", icon: "💡", name: "Utilities", description: "Água, luz e trash", amount: 190 },
+  { id: "phone", icon: "📱", name: "Telefone", description: "Mensal", amount: 50 },
+  { id: "camila", icon: "👤", name: "Camila", description: "Gastos pessoais", amount: 170 },
+  { id: "jiujitsu", icon: "🥋", name: "Jiujitsu", description: "Mensal", amount: 155 },
+  { id: "car-insurance", icon: "🚗", name: "Seguro dos Carros", description: "Mensal", amount: 245 },
+  { id: "business-insurance", icon: "🏢", name: "Seguro da Empresa", description: "Mensal", amount: 50 },
+  { id: "la-fitness", icon: "🏋️", name: "LA Fitness", description: "Camila e Eduardo", amount: 67 },
+  { id: "market", icon: "🛒", name: "Mercado", description: "Estimativa mensal", amount: 800 },
+  { id: "oportun", icon: "💳", name: "Oportun", description: "Mensal", amount: 70 },
+  { id: "gas", icon: "⛽", name: "Gasolina", description: "Estimativa mensal", amount: 220 },
+  { id: "extras", icon: "➕", name: "Extras", description: "Margem mensal", amount: 400 },
+  { id: "savings", icon: "💰", name: "Savings", description: "Valor mensal", amount: 400 }
+];
 
 const variableCategories = {
   Mercado: {
@@ -51,6 +69,165 @@ if (currentMonth) {
 
 const toggleButton = document.getElementById("toggleExpenses");
 const expenseGrid = document.getElementById("expenseGrid");
+const fixedExpensesTotal = document.getElementById("fixedExpensesTotal");
+const fixedExpensesCount = document.getElementById("fixedExpensesCount");
+let fixedExpenses = [];
+let editingFixedExpenseId = null;
+
+const isValidFixedExpense = (expense) => (
+  expense
+  && typeof expense.id === "string"
+  && typeof expense.icon === "string"
+  && typeof expense.name === "string"
+  && typeof expense.description === "string"
+  && Number.isFinite(Number(expense.amount))
+  && Number(expense.amount) >= 0
+);
+
+const loadFixedExpenses = () => {
+  try {
+    const storedExpenses = JSON.parse(localStorage.getItem(FIXED_EXPENSES_STORAGE_KEY));
+
+    if (Array.isArray(storedExpenses) && storedExpenses.every(isValidFixedExpense)) {
+      return storedExpenses.map((expense) => ({
+        ...expense,
+        amount: Number(expense.amount)
+      }));
+    }
+  } catch (error) {
+    console.error("Nao foi possivel carregar as despesas fixas salvas.", error);
+  }
+
+  return defaultFixedExpenses.map((expense) => ({ ...expense }));
+};
+
+const persistFixedExpenses = () => {
+  localStorage.setItem(FIXED_EXPENSES_STORAGE_KEY, JSON.stringify(fixedExpenses));
+};
+
+const updateFixedExpensesSummary = () => {
+  const total = fixedExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const count = fixedExpenses.length;
+
+  fixedExpensesTotal.textContent = currencyFormatter.format(total);
+  fixedExpensesCount.textContent = `${count} ${count === 1 ? "item" : "itens"}`;
+};
+
+const createFixedExpenseView = (expense) => {
+  const item = document.createElement("article");
+  item.className = "expense-item";
+  item.dataset.id = expense.id;
+
+  const icon = document.createElement("div");
+  icon.className = "icon";
+  icon.textContent = expense.icon;
+
+  const info = document.createElement("div");
+  info.className = "expense-info";
+
+  const name = document.createElement("h3");
+  name.textContent = expense.name;
+
+  const description = document.createElement("p");
+  description.textContent = expense.description;
+
+  info.append(name, description);
+
+  const side = document.createElement("div");
+  side.className = "expense-side";
+
+  const value = document.createElement("div");
+  value.className = "expense-value";
+  value.textContent = currencyFormatter.format(expense.amount);
+
+  const actions = document.createElement("div");
+  actions.className = "expense-actions";
+
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.className = "expense-action-btn edit-fixed-expense";
+  editButton.setAttribute("aria-label", `Editar ${expense.name}`);
+  editButton.textContent = "Editar";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "expense-action-btn delete-fixed-expense";
+  deleteButton.setAttribute("aria-label", `Excluir ${expense.name}`);
+  deleteButton.textContent = "Excluir";
+
+  actions.append(editButton, deleteButton);
+
+  side.append(value, actions);
+  item.append(icon, info, side);
+
+  return item;
+};
+
+const createFixedExpenseForm = (expense) => {
+  const item = document.createElement("article");
+  item.className = "expense-item is-editing";
+  item.dataset.id = expense.id;
+
+  const form = document.createElement("form");
+  form.className = "fixed-expense-form";
+
+  form.innerHTML = `
+    <label class="fixed-expense-field icon-field">
+      <span>Ícone</span>
+      <input name="icon" type="text" maxlength="8" value="" required aria-label="Ícone" />
+    </label>
+    <label class="fixed-expense-field name-field">
+      <span>Nome</span>
+      <input name="name" type="text" maxlength="60" value="" required />
+    </label>
+    <label class="fixed-expense-field description-field">
+      <span>Descrição</span>
+      <input name="description" type="text" maxlength="100" value="" required />
+    </label>
+    <label class="fixed-expense-field amount-field">
+      <span>Valor</span>
+      <input name="amount" type="number" min="0" step="0.01" value="" required inputmode="decimal" />
+    </label>
+    <div class="fixed-expense-form-actions">
+      <button type="button" class="fixed-expense-btn cancel-fixed-expense">Cancelar</button>
+      <button type="submit" class="fixed-expense-btn save-fixed-expense">Salvar</button>
+    </div>
+  `;
+
+  form.elements.icon.value = expense.icon;
+  form.elements.name.value = expense.name;
+  form.elements.description.value = expense.description;
+  form.elements.amount.value = expense.amount.toFixed(2);
+  item.appendChild(form);
+
+  requestAnimationFrame(() => form.elements.name.focus());
+
+  return item;
+};
+
+const renderFixedExpenses = () => {
+  expenseGrid.innerHTML = "";
+
+  if (fixedExpenses.length === 0) {
+    const emptyMessage = document.createElement("div");
+    emptyMessage.className = "fixed-expenses-empty";
+    emptyMessage.textContent = "Nenhuma despesa fixa cadastrada.";
+    expenseGrid.appendChild(emptyMessage);
+  } else {
+    fixedExpenses.forEach((expense) => {
+      const item = expense.id === editingFixedExpenseId
+        ? createFixedExpenseForm(expense)
+        : createFixedExpenseView(expense);
+
+      expenseGrid.appendChild(item);
+    });
+  }
+
+  updateFixedExpensesSummary();
+};
+
+fixedExpenses = loadFixedExpenses();
+renderFixedExpenses();
 
 toggleButton.addEventListener("click", () => {
   expenseGrid.classList.toggle("is-hidden");
@@ -58,6 +235,77 @@ toggleButton.addEventListener("click", () => {
   toggleButton.textContent = expenseGrid.classList.contains("is-hidden")
     ? "Expandir"
     : "Ocultar";
+});
+
+expenseGrid.addEventListener("click", (event) => {
+  const item = event.target.closest(".expense-item");
+
+  if (!item) {
+    return;
+  }
+
+  if (event.target.closest(".edit-fixed-expense")) {
+    editingFixedExpenseId = item.dataset.id;
+    renderFixedExpenses();
+    return;
+  }
+
+  if (event.target.closest(".cancel-fixed-expense")) {
+    editingFixedExpenseId = null;
+    renderFixedExpenses();
+    return;
+  }
+
+  if (event.target.closest(".delete-fixed-expense")) {
+    const expense = fixedExpenses.find(({ id }) => id === item.dataset.id);
+    const shouldDelete = confirm(`Tem certeza que deseja excluir "${expense.name}"?`);
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    fixedExpenses = fixedExpenses.filter(({ id }) => id !== item.dataset.id);
+    editingFixedExpenseId = null;
+    persistFixedExpenses();
+    renderFixedExpenses();
+    showSuccessFeedback("Despesa excluída");
+  }
+});
+
+expenseGrid.addEventListener("submit", (event) => {
+  if (!event.target.matches(".fixed-expense-form")) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const item = event.target.closest(".expense-item");
+  const formData = new FormData(event.target);
+  const updatedExpense = {
+    icon: formData.get("icon").trim(),
+    name: formData.get("name").trim(),
+    description: formData.get("description").trim(),
+    amount: Number(formData.get("amount"))
+  };
+
+  if (!updatedExpense.icon || !updatedExpense.name || !updatedExpense.description) {
+    return;
+  }
+
+  if (!Number.isFinite(updatedExpense.amount) || updatedExpense.amount < 0) {
+    event.target.elements.amount.focus();
+    return;
+  }
+
+  fixedExpenses = fixedExpenses.map((expense) => (
+    expense.id === item.dataset.id
+      ? { ...expense, ...updatedExpense }
+      : expense
+  ));
+  editingFixedExpenseId = null;
+  persistFixedExpenses();
+  renderFixedExpenses();
+  showSuccessFeedback("Alterações salvas");
 });
 
 const detailToggleButtons = document.querySelectorAll(".detail-toggle-btn");
@@ -158,8 +406,9 @@ const closeExpenseModal = () => {
   window.scrollTo(0, pageScrollY);
 };
 
-const showSuccessFeedback = () => {
+const showSuccessFeedback = (message = "Despesa adicionada") => {
   clearTimeout(successTimer);
+  successFeedback.querySelector("span").textContent = message;
   successFeedback.classList.remove("is-hidden");
   successFeedback.classList.remove("is-leaving");
 
