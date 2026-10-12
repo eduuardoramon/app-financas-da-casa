@@ -162,15 +162,25 @@ body::before {
   white-space: nowrap;
 }
 
-.toggle-btn {
+.toggle-btn,
+.fixed-add-btn {
   border: none;
-  background: #0f172a;
-  color: #ffffff;
   border-radius: 999px;
   padding: 7px 12px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.toggle-btn {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.fixed-add-btn {
+  background: #dcfce7;
+  color: #166534;
+  white-space: nowrap;
 }
 
 .expense-grid {
@@ -246,6 +256,12 @@ body::before {
 .expense-action-btn:hover {
   background: #cbd5e1;
   color: #0f172a;
+}
+
+.expense-action-btn:disabled,
+.fixed-expense-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .expense-action-btn.delete-fixed-expense {

@@ -6,11 +6,14 @@ const months = [
 const SUPABASE_URL = "https://ippfvdzmnsxyxawijjjs.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_d1IH3PrVEkz3MoHDWfPIew_V5LFQcSh";
 const VARIABLE_EXPENSES_TABLE = "variable_expenses";
+const FIXED_EXPENSES_TABLE = "fixed_expenses";
 const FIXED_EXPENSES_STORAGE_KEY = "home-finance-fixed-expenses";
+const FIXED_EXPENSES_DATA_VERSION_KEY = "home-finance-fixed-expenses-version";
+const FIXED_EXPENSES_DATA_VERSION = 2;
 
 const defaultFixedExpenses = [
   { id: "rent", icon: "🏠", name: "Aluguel", description: "Dia 1 a 3 de cada mês", amount: 1797 },
-  { id: "school", icon: "🎓", name: "Escola", description: "Até dia 3", amount: 525 },
+  { id: "school", icon: "🎓", name: "Escola", description: "Até dia 3", amount: 577 },
   { id: "utilities", icon: "💡", name: "Utilities", description: "Água, luz e trash", amount: 190 },
   { id: "phone", icon: "📱", name: "Telefone", description: "Mensal", amount: 50 },
   { id: "camila", icon: "👤", name: "Camila", description: "Gastos pessoais", amount: 170 },
@@ -20,9 +23,9 @@ const defaultFixedExpenses = [
   { id: "la-fitness", icon: "🏋️", name: "LA Fitness", description: "Camila e Eduardo", amount: 67 },
   { id: "market", icon: "🛒", name: "Mercado", description: "Estimativa mensal", amount: 800 },
   { id: "oportun", icon: "💳", name: "Oportun", description: "Mensal", amount: 70 },
-  { id: "gas", icon: "⛽", name: "Gasolina", description: "Estimativa mensal", amount: 220 },
+  { id: "gas", icon: "⛽", name: "Gasolina", description: "Estimativa mensal", amount: 300 },
   { id: "extras", icon: "➕", name: "Extras", description: "Margem mensal", amount: 400 },
-  { id: "savings", icon: "💰", name: "Savings", description: "Valor mensal", amount: 400 }
+  { id: "savings", icon: "🚗", name: "Parcela do carro", description: "Valor mensal", amount: 500 }
 ];
 
 const variableCategories = {
@@ -41,7 +44,7 @@ const variableCategories = {
     usedId: "extrasUsed"
   },
   Gasolina: {
-    budget: 220,
+    budget: 300,
     detailsId: "gasDetails",
     percentId: "gasPercent",
     progressId: "gasProgress",
@@ -68,11 +71,13 @@ if (currentMonth) {
 }
 
 const toggleButton = document.getElementById("toggleExpenses");
+const addFixedExpenseButton = document.getElementById("addFixedExpense");
 const expenseGrid = document.getElementById("expenseGrid");
 const fixedExpensesTotal = document.getElementById("fixedExpensesTotal");
 const fixedExpensesCount = document.getElementById("fixedExpensesCount");
 let fixedExpenses = [];
 let editingFixedExpenseId = null;
+let isAddingFixedExpense = false;
 
 const isValidFixedExpense = (expense) => (
   expense
@@ -84,15 +89,41 @@ const isValidFixedExpense = (expense) => (
   && Number(expense.amount) >= 0
 );
 
+const migrateFixedExpenses = (expenses) => expenses.map((expense) => {
+  if (expense.id === "school") {
+    return { ...expense, amount: 577 };
+  }
+
+  if (expense.id === "gas") {
+    return { ...expense, amount: 300 };
+  }
+
+  if (expense.id === "savings") {
+    return { ...expense, icon: "🚗", name: "Parcela do carro", amount: 500 };
+  }
+
+  return expense;
+});
+
 const loadFixedExpenses = () => {
   try {
     const storedExpenses = JSON.parse(localStorage.getItem(FIXED_EXPENSES_STORAGE_KEY));
 
     if (Array.isArray(storedExpenses) && storedExpenses.every(isValidFixedExpense)) {
-      return storedExpenses.map((expense) => ({
+      let expenses = storedExpenses.map((expense) => ({
         ...expense,
         amount: Number(expense.amount)
       }));
+
+      const storedVersion = Number(localStorage.getItem(FIXED_EXPENSES_DATA_VERSION_KEY) || 1);
+
+      if (storedVersion < FIXED_EXPENSES_DATA_VERSION) {
+        expenses = migrateFixedExpenses(expenses);
+        localStorage.setItem(FIXED_EXPENSES_STORAGE_KEY, JSON.stringify(expenses));
+        localStorage.setItem(FIXED_EXPENSES_DATA_VERSION_KEY, String(FIXED_EXPENSES_DATA_VERSION));
+      }
+
+      return expenses;
     }
   } catch (error) {
     console.error("Nao foi possivel carregar as despesas fixas salvas.", error);
@@ -103,6 +134,27 @@ const loadFixedExpenses = () => {
 
 const persistFixedExpenses = () => {
   localStorage.setItem(FIXED_EXPENSES_STORAGE_KEY, JSON.stringify(fixedExpenses));
+  localStorage.setItem(FIXED_EXPENSES_DATA_VERSION_KEY, String(FIXED_EXPENSES_DATA_VERSION));
+};
+
+const normalizeFixedExpense = (expense) => ({
+  id: expense.id,
+  icon: expense.icon,
+  name: expense.name,
+  description: expense.description,
+  amount: Number(expense.amount),
+  sortOrder: Number(expense.sort_order ?? expense.sortOrder ?? 0)
+});
+
+const getNextFixedExpenseSortOrder = () => fixedExpenses.reduce(
+  (highestOrder, expense, index) => Math.max(highestOrder, expense.sortOrder || index + 1),
+  0
+) + 1;
+
+const createFixedExpenseId = () => {
+  const uniquePart = globalThis.crypto?.randomUUID?.() || Date.now().toString(36);
+
+  return `fixed-${uniquePart}`;
 };
 
 const updateFixedExpensesSummary = () => {
@@ -163,13 +215,14 @@ const createFixedExpenseView = (expense) => {
   return item;
 };
 
-const createFixedExpenseForm = (expense) => {
+const createFixedExpenseForm = (expense, isNew = false) => {
   const item = document.createElement("article");
-  item.className = "expense-item is-editing";
+  item.className = `expense-item is-editing${isNew ? " is-new" : ""}`;
   item.dataset.id = expense.id;
 
   const form = document.createElement("form");
   form.className = "fixed-expense-form";
+  form.dataset.mode = isNew ? "create" : "update";
 
   form.innerHTML = `
     <label class="fixed-expense-field icon-field">
@@ -190,14 +243,14 @@ const createFixedExpenseForm = (expense) => {
     </label>
     <div class="fixed-expense-form-actions">
       <button type="button" class="fixed-expense-btn cancel-fixed-expense">Cancelar</button>
-      <button type="submit" class="fixed-expense-btn save-fixed-expense">Salvar</button>
+      <button type="submit" class="fixed-expense-btn save-fixed-expense">${isNew ? "Adicionar" : "Salvar"}</button>
     </div>
   `;
 
   form.elements.icon.value = expense.icon;
   form.elements.name.value = expense.name;
   form.elements.description.value = expense.description;
-  form.elements.amount.value = expense.amount.toFixed(2);
+  form.elements.amount.value = isNew ? "" : expense.amount.toFixed(2);
   item.appendChild(form);
 
   requestAnimationFrame(() => form.elements.name.focus());
@@ -208,7 +261,7 @@ const createFixedExpenseForm = (expense) => {
 const renderFixedExpenses = () => {
   expenseGrid.innerHTML = "";
 
-  if (fixedExpenses.length === 0) {
+  if (fixedExpenses.length === 0 && !isAddingFixedExpense) {
     const emptyMessage = document.createElement("div");
     emptyMessage.className = "fixed-expenses-empty";
     emptyMessage.textContent = "Nenhuma despesa fixa cadastrada.";
@@ -221,6 +274,16 @@ const renderFixedExpenses = () => {
 
       expenseGrid.appendChild(item);
     });
+
+    if (isAddingFixedExpense) {
+      expenseGrid.appendChild(createFixedExpenseForm({
+        id: "",
+        icon: "💳",
+        name: "",
+        description: "",
+        amount: 0
+      }, true));
+    }
   }
 
   updateFixedExpensesSummary();
@@ -228,6 +291,14 @@ const renderFixedExpenses = () => {
 
 fixedExpenses = loadFixedExpenses();
 renderFixedExpenses();
+
+addFixedExpenseButton.addEventListener("click", () => {
+  editingFixedExpenseId = null;
+  isAddingFixedExpense = true;
+  expenseGrid.classList.remove("is-hidden");
+  toggleButton.textContent = "Ocultar";
+  renderFixedExpenses();
+});
 
 toggleButton.addEventListener("click", () => {
   expenseGrid.classList.toggle("is-hidden");
@@ -237,7 +308,7 @@ toggleButton.addEventListener("click", () => {
     : "Ocultar";
 });
 
-expenseGrid.addEventListener("click", (event) => {
+expenseGrid.addEventListener("click", async (event) => {
   const item = event.target.closest(".expense-item");
 
   if (!item) {
@@ -246,12 +317,14 @@ expenseGrid.addEventListener("click", (event) => {
 
   if (event.target.closest(".edit-fixed-expense")) {
     editingFixedExpenseId = item.dataset.id;
+    isAddingFixedExpense = false;
     renderFixedExpenses();
     return;
   }
 
   if (event.target.closest(".cancel-fixed-expense")) {
     editingFixedExpenseId = null;
+    isAddingFixedExpense = false;
     renderFixedExpenses();
     return;
   }
@@ -264,15 +337,24 @@ expenseGrid.addEventListener("click", (event) => {
       return;
     }
 
-    fixedExpenses = fixedExpenses.filter(({ id }) => id !== item.dataset.id);
-    editingFixedExpenseId = null;
-    persistFixedExpenses();
-    renderFixedExpenses();
-    showSuccessFeedback("Despesa excluída");
+    const deleteButton = event.target.closest(".delete-fixed-expense");
+    deleteButton.disabled = true;
+
+    try {
+      await deleteFixedExpense(item.dataset.id);
+      fixedExpenses = fixedExpenses.filter(({ id }) => id !== item.dataset.id);
+      editingFixedExpenseId = null;
+      persistFixedExpenses();
+      renderFixedExpenses();
+      showSuccessFeedback("Despesa excluída");
+    } catch (error) {
+      alert(error.message);
+      deleteButton.disabled = false;
+    }
   }
 });
 
-expenseGrid.addEventListener("submit", (event) => {
+expenseGrid.addEventListener("submit", async (event) => {
   if (!event.target.matches(".fixed-expense-form")) {
     return;
   }
@@ -280,6 +362,7 @@ expenseGrid.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const item = event.target.closest(".expense-item");
+  const isCreating = event.target.dataset.mode === "create";
   const formData = new FormData(event.target);
   const updatedExpense = {
     icon: formData.get("icon").trim(),
@@ -297,15 +380,38 @@ expenseGrid.addEventListener("submit", (event) => {
     return;
   }
 
-  fixedExpenses = fixedExpenses.map((expense) => (
-    expense.id === item.dataset.id
-      ? { ...expense, ...updatedExpense }
-      : expense
-  ));
-  editingFixedExpenseId = null;
-  persistFixedExpenses();
-  renderFixedExpenses();
-  showSuccessFeedback("Alterações salvas");
+  const saveButton = event.target.querySelector(".save-fixed-expense");
+  saveButton.disabled = true;
+  saveButton.textContent = isCreating ? "Adicionando..." : "Salvando...";
+
+  try {
+    if (isCreating) {
+      const createdExpense = await createFixedExpense({
+        id: createFixedExpenseId(),
+        ...updatedExpense,
+        sort_order: getNextFixedExpenseSortOrder()
+      });
+
+      fixedExpenses.push(createdExpense);
+      isAddingFixedExpense = false;
+    } else {
+      await updateFixedExpense(item.dataset.id, updatedExpense);
+      fixedExpenses = fixedExpenses.map((expense) => (
+        expense.id === item.dataset.id
+          ? { ...expense, ...updatedExpense }
+          : expense
+      ));
+    }
+
+    editingFixedExpenseId = null;
+    persistFixedExpenses();
+    renderFixedExpenses();
+    showSuccessFeedback(isCreating ? "Despesa adicionada" : "Alterações salvas");
+  } catch (error) {
+    alert(error.message);
+    saveButton.disabled = false;
+    saveButton.textContent = isCreating ? "Adicionar" : "Salvar";
+  }
 });
 
 const detailToggleButtons = document.querySelectorAll(".detail-toggle-btn");
@@ -338,6 +444,85 @@ const supabaseHeaders = {
   apikey: SUPABASE_ANON_KEY,
   Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
   "Content-Type": "application/json"
+};
+
+const loadFixedExpensesFromDatabase = async () => {
+  const query = new URLSearchParams({
+    select: "id,icon,name,description,amount,sort_order",
+    order: "sort_order.asc"
+  });
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${FIXED_EXPENSES_TABLE}?${query}`, {
+    headers: supabaseHeaders
+  });
+
+  if (!response.ok) {
+    throw new Error("Nao foi possivel carregar as despesas fixas do banco.");
+  }
+
+  const expenses = await response.json();
+
+  if (!Array.isArray(expenses)) {
+    throw new Error("O banco retornou despesas fixas invalidas.");
+  }
+
+  fixedExpenses = expenses.map(normalizeFixedExpense);
+  persistFixedExpenses();
+  renderFixedExpenses();
+};
+
+const createFixedExpense = async (expense) => {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${FIXED_EXPENSES_TABLE}`, {
+    method: "POST",
+    headers: {
+      ...supabaseHeaders,
+      Prefer: "return=representation"
+    },
+    body: JSON.stringify(expense)
+  });
+
+  if (!response.ok) {
+    throw new Error("Nao foi possivel adicionar a despesa fixa.");
+  }
+
+  const createdExpenses = await response.json();
+
+  if (!Array.isArray(createdExpenses) || createdExpenses.length !== 1) {
+    throw new Error("O banco nao confirmou a nova despesa fixa.");
+  }
+
+  return normalizeFixedExpense(createdExpenses[0]);
+};
+
+const updateFixedExpense = async (id, expense) => {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${FIXED_EXPENSES_TABLE}?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: {
+      ...supabaseHeaders,
+      Prefer: "return=minimal"
+    },
+    body: JSON.stringify({
+      ...expense,
+      updated_at: new Date().toISOString()
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Nao foi possivel salvar a despesa fixa.");
+  }
+};
+
+const deleteFixedExpense = async (id) => {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${FIXED_EXPENSES_TABLE}?id=eq.${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: {
+      ...supabaseHeaders,
+      Prefer: "return=minimal"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Nao foi possivel excluir a despesa fixa.");
+  }
 };
 
 const getTodayInputValue = () => {
@@ -612,5 +797,9 @@ expenseForm.addEventListener("submit", async (event) => {
 });
 
 loadVariableExpenses().catch((error) => {
+  console.error(error);
+});
+
+loadFixedExpensesFromDatabase().catch((error) => {
   console.error(error);
 });
